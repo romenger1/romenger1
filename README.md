@@ -1,7 +1,7 @@
 - 👋 Hi, I’m Rodrigo Menger Hoffmann (@romenger1).
 - 👀 I’m interested in developement whit JavaScript, NoseJS, Python, Node-red
 - 🌱 I’m currently learning JavaScript, cloud, IOT, machine  learning.
-- 💞️ I’m looking to collaborate on ...Automation whit PLC, Grafana, Dashboard, Database.
+- 💞️ I’m looking to collaborate on ...Automation whit PLC, Grafana, Dashboard, Database, Data integration with Node-Red.
 - 📫 How to reach me ... rodrigomenger@hotmail.com
 
 <!---
