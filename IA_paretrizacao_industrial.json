@@ -1,0 +1,597 @@
+[
+    {
+        "id": "cf935818cf751d3c",
+        "type": "tab",
+        "label": "Aquisição PLC Envolvedora",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "fd5cd174e1ee71d0",
+        "type": "tab",
+        "label": "Gerar Dataset para IA",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "25a6250e75cec36d",
+        "type": "tab",
+        "label": "Otimização de Receitas com TensorFlow",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "ebe674649b194c92",
+        "type": "s7 endpoint",
+        "z": "cf935818cf751d3c",
+        "transport": "iso-on-tcp",
+        "address": "192.168.10.1",
+        "port": "102",
+        "rack": "0",
+        "slot": "2",
+        "localtsaphi": "01",
+        "localtsaplo": "00",
+        "remotetsaphi": "01",
+        "remotetsaplo": "00",
+        "connmode": "rack-slot",
+        "adapter": "",
+        "busaddr": "",
+        "cycletime": "",
+        "timeout": "1500",
+        "name": "PLC Envolvedora",
+        "vartable": []
+    },
+    {
+        "id": "ebee850071a01394",
+        "type": "influxdb",
+        "z": "cf935818cf751d3c",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "envolvedora",
+        "name": "InfluxDB Envolvedora",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://localhost:8086",
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "f3b94c6d12191755",
+        "type": "influxdb",
+        "z": "fd5cd174e1ee71d0",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "envolvedora",
+        "name": "InfluxDB Envolvedora",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://localhost:8086",
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "edf48c5d493fed34",
+        "type": "influxdb",
+        "z": "25a6250e75cec36d",
+        "hostname": "127.0.0.1",
+        "port": "8086",
+        "protocol": "http",
+        "database": "envolvedora",
+        "name": "InfluxDB Envolvedora",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://localhost:8086",
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "661280cefd5ff305",
+        "type": "s7 endpoint",
+        "z": "25a6250e75cec36d",
+        "transport": "iso-on-tcp",
+        "address": "192.168.10.1",
+        "port": "102",
+        "rack": "0",
+        "slot": "2",
+        "localtsaphi": "01",
+        "localtsaplo": "00",
+        "remotetsaphi": "01",
+        "remotetsaplo": "00",
+        "connmode": "rack-slot",
+        "adapter": "",
+        "busaddr": "",
+        "cycletime": "",
+        "timeout": "1500",
+        "name": "PLC Envolvedora",
+        "vartable": []
+    },
+    {
+        "id": "39a77cbf1f4c78c8",
+        "type": "inject",
+        "z": "cf935818cf751d3c",
+        "name": "A cada 1 segundo",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 270,
+        "y": 240,
+        "wires": [
+            [
+                "d57ee4b49ef7fdd1"
+            ]
+        ]
+    },
+    {
+        "id": "15625cef468cda36",
+        "type": "s7 in",
+        "z": "cf935818cf751d3c",
+        "endpoint": "ebe674649b194c92",
+        "mode": "all-split",
+        "variable": "AlarmesBrutos",
+        "diff": false,
+        "name": "Ler DB - Alarmes",
+        "x": 470,
+        "y": 210,
+        "wires": [
+            [
+                "72ac0bc0701a4c1b"
+            ]
+        ]
+    },
+    {
+        "id": "72ac0bc0701a4c1b",
+        "type": "function",
+        "z": "cf935818cf751d3c",
+        "name": "Processar Alarmes",
+        "func": "// Mapeamento completo dos alarmes conforme DB66\nconst alarmesMap = {\n    \"0.0\": \"Botão Emergência CCM\",\n    \"0.1\": \"Botão Emergência QCS\",\n    \"0.2\": \"Reservado 02\",\n    \"0.3\": \"Reservado 03\",\n    \"0.4\": \"Contator Emergência\",\n    \"0.5\": \"Reservado 05\",\n    \"0.6\": \"Falha Ar Comprimido\",\n    \"0.7\": \"Sensor Porta Aberta\",\n    \"1.0\": \"Reservado 10\",\n    \"1.1\": \"Reservado 11\",\n    \"1.2\": \"Sensor Barreira Entrada\",\n    \"1.3\": \"Sensor Barreira Saída\",\n    \"1.4\": \"Reservado 14\",\n    \"1.5\": \"Reservado 15\",\n    \"1.6\": \"Detector Filme Rompido\",\n    \"1.7\": \"Sensor Pouco Filme\",\n    \"2.0\": \"Sensor Fim de Bobina\",\n    \"2.1\": \"Falha Acionamento Rotação\",\n    \"2.2\": \"Falha Acionamento Elevação\",\n    \"2.3\": \"Falha Motor Alimentador\",\n    \"2.4\": \"Falha Motor Pré-Estiramento\",\n    \"2.5\": \"Falha Sistema Corte\",\n    \"2.6\": \"Falha Mecanismo Pinça\",\n    \"2.7\": \"Falha Unidade Corder\",\n    \"3.0\": \"Falha Elevador de Paletes\"\n    // Adicione os demais conforme necessário\n};\n\nlet buf = Buffer.from(msg.payload);\nlet alarmesAtivos = [];\n\n// Processa cada byte\nfor (let byte = 0; byte < buf.length; byte++) {\n    // Processa cada bit no byte\n    for (let bit = 0; bit < 8; bit++) {\n        let endereco = `${byte}.${bit}`;\n        if (alarmesMap[endereco] && ((buf[byte] >> bit) & 1)) {\n            alarmesAtivos.push({\n                endereco: endereco,\n                nome: alarmesMap[endereco],\n                timestamp: new Date().toISOString()\n            });\n        }\n    }\n}\n\n// Prepara mensagem para InfluxDB\nmsg.payload = alarmesAtivos.map(alarme => ({\n    measurement: \"alarmes\",\n    tags: {\n        maquina: \"envolvedora\",\n        tipo: \"alarme\"\n    },\n    fields: {\n        nome: alarme.nome,\n        endereco: alarme.endereco,\n        estado: 1\n    },\n    timestamp: new Date(alarme.timestamp).getTime() * 1000000\n}));\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 210,
+        "wires": [
+            [
+                "01963024652938c3",
+                "9cbc3b29af61112f"
+            ]
+        ]
+    },
+    {
+        "id": "d57ee4b49ef7fdd1",
+        "type": "s7 in",
+        "z": "cf935818cf751d3c",
+        "endpoint": "ebe674649b194c92",
+        "mode": "single",
+        "variable": "ReceitaAtual",
+        "diff": false,
+        "name": "Ler Dados Receita",
+        "x": 480,
+        "y": 270,
+        "wires": [
+            [
+                "449630b85d25cfa1"
+            ]
+        ]
+    },
+    {
+        "id": "449630b85d25cfa1",
+        "type": "function",
+        "z": "cf935818cf751d3c",
+        "name": "Processar Receita",
+        "func": "let buf = Buffer.from(msg.payload);\nlet timestamp = new Date().toISOString();\n\n// Estrutura da UDT3 conforme documentação\nlet receita = {\n    measurement: \"receita\",\n    tags: {\n        maquina: \"envolvedora\",\n        tipo: \"configuracao\"\n    },\n    fields: {\n        nomePrograma: buf.toString('utf8', 0, 20).replace(/\\0/g, ''),\n        numVoltasBaixo: buf.readInt16LE(22),\n        numVoltasCima: buf.readInt16LE(24),\n        deslVertSubida: buf.readFloatLE(26),\n        deslVertDescida: buf.readFloatLE(30),\n        velAltaRotacao: buf.readFloatLE(34),\n        velBaixaRotacao: buf.readFloatLE(38),\n        preEstiramentoInicial: buf.readFloatLE(42),\n        preEstiramento: buf.readFloatLE(46),\n        larguraPalete: buf.readFloatLE(50),\n        comprimentoPalete: buf.readFloatLE(54)\n    },\n    timestamp: new Date(timestamp).getTime() * 1000000\n};\n\nmsg.payload = [receita];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 270,
+        "wires": [
+            [
+                "01963024652938c3",
+                "7191020a8f8c06a3"
+            ]
+        ]
+    },
+    {
+        "id": "01963024652938c3",
+        "type": "influxdb out",
+        "z": "cf935818cf751d3c",
+        "influxdb": "ebee850071a01394",
+        "name": "Salvar no InfluxDB",
+        "measurement": "",
+        "precision": "ms",
+        "retentionPolicy": "",
+        "database": "envolvedora",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "ficticio",
+        "bucket": "envolvedora",
+        "x": 1020,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "9cbc3b29af61112f",
+        "type": "debug",
+        "z": "cf935818cf751d3c",
+        "name": "Debug Alarmes",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 890,
+        "y": 150,
+        "wires": []
+    },
+    {
+        "id": "7191020a8f8c06a3",
+        "type": "debug",
+        "z": "cf935818cf751d3c",
+        "name": "Debug Receita",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 890,
+        "y": 330,
+        "wires": []
+    },
+    {
+        "id": "trigger_geracao",
+        "type": "inject",
+        "z": "fd5cd174e1ee71d0",
+        "name": "Gerar Dataset Diário",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "86400",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 5,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 230,
+        "y": 120,
+        "wires": [
+            [
+                "query_receitas"
+            ]
+        ]
+    },
+    {
+        "id": "query_receitas",
+        "type": "influxdb in",
+        "z": "fd5cd174e1ee71d0",
+        "influxdb": "f3b94c6d12191755",
+        "name": "Consultar Receitas",
+        "query": "from(bucket: \"envolvedora\")\n  |> range(start: -7d)\n  |> filter(fn: (r) => r._measurement == \"receita\")\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [\"nomePrograma\"])",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "Ficticia",
+        "x": 240,
+        "y": 210,
+        "wires": [
+            [
+                "processar_receitas"
+            ]
+        ]
+    },
+    {
+        "id": "processar_receitas",
+        "type": "function",
+        "z": "fd5cd174e1ee71d0",
+        "name": "Processar Receitas",
+        "func": "// Agrupa receitas por nome e pega a última configuração\nconst receitas = {};\n\nmsg.payload.forEach(record => {\n    const nome = record.nomePrograma;\n    if (!receitas[nome] || new Date(record._time) > new Date(receitas[nome]._time)) {\n        receitas[nome] = record;\n    }\n});\n\n// Prepara lista de receitas únicas\nmsg.receitas = Object.values(receitas);\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 120,
+        "wires": [
+            [
+                "query_alarmes"
+            ]
+        ]
+    },
+    {
+        "id": "query_alarmes",
+        "type": "function",
+        "z": "fd5cd174e1ee71d0",
+        "name": "Criar Query Alarmes",
+        "func": "// Para cada receita, cria query para buscar alarmes correspondentes\nconst queries = [];\nconst now = new Date();\nconst oneDay = 24 * 60 * 60 * 1000;\n\nmsg.receitas.forEach(receita => {\n    const startTime = new Date(new Date(receita._time).getTime() - oneDay);\n    const endTime = new Date(new Date(receita._time).getTime() + oneDay);\n    \n    queries.push({\n        query: `from(bucket: \"envolvedora\")\n  |> range(start: ${startTime}, stop: ${endTime})\n  |> filter(fn: (r) => r._measurement == \"alarmes\")\n  |> group(columns: [\"nome\"])\n  |> count()\n  |> pivot(rowKey:[\"_time\"], columnKey: [\"nome\"], valueColumn: \"_value\")`,\n        receita: receita\n    });\n});\n\nmsg.queries = queries;\nmsg.index = 0;\nmsg.payload = queries[0].query;\nmsg.receitaAtual = queries[0].receita;\n\nreturn [msg, null];",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 210,
+        "wires": [
+            [
+                "executar_query_alarmes"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "executar_query_alarmes",
+        "type": "influxdb in",
+        "z": "fd5cd174e1ee71d0",
+        "influxdb": "f3b94c6d12191755",
+        "name": "Executar Query Alarmes",
+        "query": "",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "Ficticia",
+        "x": 820,
+        "y": 120,
+        "wires": [
+            [
+                "processar_dados_treinamento"
+            ]
+        ]
+    },
+    {
+        "id": "processar_dados_treinamento",
+        "type": "function",
+        "z": "fd5cd174e1ee71d0",
+        "name": "Criar Dataset Treino",
+        "func": "// Inicializa dataset se não existir\nif (!context.dataset) {\n    context.dataset = [];\n}\n\n// Processa os alarmes para a receita atual\nconst alarmes = {};\nmsg.payload.forEach(record => {\n    Object.keys(record).forEach(key => {\n        if (key !== '_time' && key !== '_measurement' && key !== 'result' && key !== 'table') {\n            alarmes[key] = record[key] || 0;\n        }\n    });\n});\n\n// Calcula métrica de eficiência (simplificado)\nconst totalAlarmes = Object.values(alarmes).reduce((a, b) => a + b, 0);\nconst eficiencia = totalAlarmes > 0 ? 1 / (1 + Math.log(totalAlarmes)) : 1;\n\n// Adiciona ao dataset\ncontext.dataset.push({\n    features: {\n        ...msg.receitaAtual,\n        alarmes: alarmes\n    },\n    target: eficiencia\n});\n\n// Verifica se há mais queries para processar\nmsg.index++;\nif (msg.index < msg.queries.length) {\n    msg.payload = msg.queries[msg.index].query;\n    msg.receitaAtual = msg.queries[msg.index].receita;\n    return [msg, null];\n} else {\n    // Quando todas as queries forem processadas\n    const dataset = context.dataset;\n    context.dataset = []; // Reseta para próxima execução\n    \n    // Prepara mensagem com dataset completo\n    return [null, {\n        payload: dataset,\n        topic: \"dataset_treinamento\"\n    }];\n}",
+        "outputs": 2,
+        "noerr": 0,
+        "x": 820,
+        "y": 210,
+        "wires": [
+            [
+                "executar_query_alarmes"
+            ],
+            [
+                "salvar_dataset"
+            ]
+        ]
+    },
+    {
+        "id": "salvar_dataset",
+        "type": "file",
+        "z": "fd5cd174e1ee71d0",
+        "name": "Salvar Dataset JSON",
+        "filename": "dataset_treinamento.json",
+        "filenameType": "str",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 1100,
+        "y": 150,
+        "wires": [
+            [
+                "debug_dataset"
+            ]
+        ]
+    },
+    {
+        "id": "debug_dataset",
+        "type": "debug",
+        "z": "fd5cd174e1ee71d0",
+        "name": "Debug Dataset",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "payload",
+        "statusType": "auto",
+        "x": 1110,
+        "y": 210,
+        "wires": []
+    },
+    {
+        "id": "e074784c7061f6ca",
+        "type": "inject",
+        "z": "25a6250e75cec36d",
+        "name": "Iniciar Treinamento",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 120,
+        "wires": [
+            [
+                "0eacf2dc5c57a23a"
+            ]
+        ]
+    },
+    {
+        "id": "0eacf2dc5c57a23a",
+        "type": "function",
+        "z": "25a6250e75cec36d",
+        "name": "Carregar Dados do Influx",
+        "func": "// Query para receitas e alarmes dos últimos 30 dias\nconst query = `\nwith receitas as (\n  from(bucket: \"envolvedora\")\n    |> range(start: -30d)\n    |> filter(fn: (r) => r._measurement == \"receita\")\n    |> pivot(rowKey:[\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n    |> group(columns: [\"nomePrograma\"])\n),\nalarmes as (\n  from(bucket: \"envolvedora\")\n    |> range(start: -30d)\n    |> filter(fn: (r) => r._measurement == \"alarmes\")\n    |> group(columns: [\"nome\"])\n    |> count()\n)\n\njoin(\n  tables: {receitas: receitas, alarmes: alarmes},\n  on: [\"_time\"]\n)\n`;\n\nmsg.query = query;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 260,
+        "y": 210,
+        "wires": [
+            [
+                "d3d4ca7a9e5aad80"
+            ]
+        ]
+    },
+    {
+        "id": "d3d4ca7a9e5aad80",
+        "type": "influxdb in",
+        "z": "25a6250e75cec36d",
+        "influxdb": "edf48c5d493fed34",
+        "name": "Executar Query",
+        "query": "",
+        "rawOutput": false,
+        "precision": "",
+        "retentionPolicy": "",
+        "org": "ficticio",
+        "x": 410,
+        "y": 120,
+        "wires": [
+            [
+                "6cfaa01019637309"
+            ]
+        ]
+    },
+    {
+        "id": "6cfaa01019637309",
+        "type": "function",
+        "z": "25a6250e75cec36d",
+        "name": "Preparar Dataset",
+        "func": "// Extrai features relevantes e calcula score de eficiência\nconst records = msg.payload;\nconst dataset = {\n    features: [],\n    labels: []\n};\n\n// Mapeamento de features numéricas da receita\nconst featureKeys = [\n    'velAltaRotacao',\n    'velBaixaRotacao',\n    'preEstiramento',\n    'larguraPalete',\n    'comprimentoPalete'\n];\n\n// Processa cada registro\nrecords.forEach(record => {\n    // Features da receita\n    const features = featureKeys.map(key => record[key] || 0);\n    \n    // Calcula score de eficiência baseado em alarmes (inverso da contagem)\n    const totalAlarmes = record['nome'] || 1; // Evita divisão por zero\n    const eficiencia = 1 / (1 + Math.log(totalAlarmes));\n    \n    dataset.features.push(features);\n    dataset.labels.push(eficiencia);\n});\n\n// Normaliza os dados (min-max scaling)\nconst normalized = {\n    features: [],\n    labels: dataset.labels,\n    stats: {}\n};\n\nfeatureKeys.forEach((key, idx) => {\n    const values = dataset.features.map(f => f[idx]);\n    const min = Math.min(...values);\n    const max = Math.max(...values);\n    \n    normalized.stats[key] = { min, max };\n    \n    dataset.features.forEach((f, i) => {\n        if (!normalized.features[i]) normalized.features[i] = [];\n        normalized.features[i][idx] = (f[idx] - min) / (max - min);\n    });\n});\n\nmsg.dataset = normalized;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 540,
+        "y": 210,
+        "wires": [
+            [
+                "d3aa0724c0fd4769"
+            ]
+        ]
+    },
+    {
+        "id": "d3aa0724c0fd4769",
+        "type": "function",
+        "z": "25a6250e75cec36d",
+        "name": "Treinar Modelo TensorFlow",
+        "func": "// Carrega TensorFlow.js dinamicamente\nconst script = document.createElement('script');\nscript.src = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest';\nscript.onload = function() {\n    const tf = window.tensorflow;\n    \n    // Converte dados para tensores\n    const features = tf.tensor2d(msg.dataset.features);\n    const labels = tf.tensor1d(msg.dataset.labels);\n    \n    // Cria modelo sequencial\n    const model = tf.sequential();\n    model.add(tf.layers.dense({\n        units: 16,\n        activation: 'relu',\n        inputShape: [msg.dataset.features[0].length]\n    }));\n    model.add(tf.layers.dense({\n        units: 8,\n        activation: 'relu'\n    }));\n    model.add(tf.layers.dense({\n        units: 1,\n        activation: 'sigmoid'\n    }));\n    \n    // Compila o modelo\n    model.compile({\n        optimizer: tf.train.adam(0.01),\n        loss: 'meanSquaredError',\n        metrics: ['accuracy']\n    });\n    \n    // Treina o modelo\n    model.fit(features, labels, {\n        epochs: 100,\n        batchSize: 32,\n        validationSplit: 0.2,\n        callbacks: {\n            onEpochEnd: (epoch, logs) => {\n                node.status({fill:\"blue\",shape:\"dot\",text:`Epoch ${epoch} - Loss: ${logs.loss.toFixed(4)}`});\n            }\n        }\n    }).then(() => {\n        // Salva o modelo treinado\n        msg.model = model;\n        msg.stats = msg.dataset.stats;\n        node.send(msg);\n        \n        // Exemplo de predição\n        const exampleFeatures = msg.dataset.features[0];\n        const prediction = model.predict(tf.tensor2d([exampleFeatures]));\n        node.log(`Predição de eficiência: ${prediction.dataSync()[0]}`);\n    });\n};\n\ndocument.head.appendChild(script);\n\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 690,
+        "y": 120,
+        "wires": [
+            [
+                "f13d8f720dd423e9"
+            ]
+        ]
+    },
+    {
+        "id": "f13d8f720dd423e9",
+        "type": "function",
+        "z": "25a6250e75cec36d",
+        "name": "Otimizar Parâmetros",
+        "func": "// Usa o modelo treinado para encontrar parâmetros ideais\nconst tf = window.tensorflow;\nconst model = msg.model;\nconst stats = msg.stats;\n\n// Função para desnormalizar valores\nfunction desnormalize(key, value) {\n    const { min, max } = stats[key];\n    return value * (max - min) + min;\n}\n\n// Gera combinações de parâmetros e prediz eficiência\nconst gridSize = 10;\nconst bestParams = {\n    score: 0,\n    params: {}\n};\n\n// Itera sobre combinações possíveis (simplificado)\nfor (let v1 = 0; v1 <= 1; v1 += 1/gridSize) {\n    for (let v2 = 0; v2 <= 1; v2 += 1/gridSize) {\n        const input = tf.tensor2d([[v1, v2, 0.5, 0.5, 0.5]]); // Valores normalizados\n        const prediction = model.predict(input).dataSync()[0];\n        \n        if (prediction > bestParams.score) {\n            bestParams.score = prediction;\n            bestParams.params = {\n                velAltaRotacao: desnormalize('velAltaRotacao', v1),\n                velBaixaRotacao: desnormalize('velBaixaRotacao', v2),\n                preEstiramento: desnormalize('preEstiramento', 0.5),\n                // outros parâmetros...\n            };\n        }\n    }\n}\n\nmsg.payload = {\n    melhorConfiguracao: bestParams.params,\n    eficienciaEsperada: bestParams.score,\n    estatisticas: stats\n};\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 830,
+        "y": 210,
+        "wires": [
+            [
+                "a612a33f19077a72"
+            ]
+        ]
+    },
+    {
+        "id": "a612a33f19077a72",
+        "type": "file",
+        "z": "25a6250e75cec36d",
+        "name": "Salvar Resultados",
+        "filename": "otimizacao_receita.json",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "utf8",
+        "x": 990,
+        "y": 120,
+        "wires": [
+            [
+                "15f5d044091aa2a3"
+            ]
+        ]
+    },
+    {
+        "id": "15f5d044091aa2a3",
+        "type": "debug",
+        "z": "25a6250e75cec36d",
+        "name": "Debug Resultados",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 1140,
+        "y": 210,
+        "wires": []
+    },
+    {
+        "id": "fc57de31f3cfc614",
+        "type": "function",
+        "z": "25a6250e75cec36d",
+        "name": "Aplicar Receita Otimizada",
+        "func": "// Converte a receita otimizada para o formato do PLC\nconst receitaOtimizada = msg.payload.melhorConfiguracao;\n\n// Cria buffer com a estrutura UDT3\nconst buffer = Buffer.alloc(90);\n\n// Preenche os valores (exemplo simplificado)\nbuffer.writeFloatLE(receitaOtimizada.velAltaRotacao, 34);\nbuffer.writeFloatLE(receitaOtimizada.velBaixaRotacao, 38);\nbuffer.writeFloatLE(receitaOtimizada.preEstiramento, 46);\n// ... outros campos\n\nmsg.payload = buffer;\nmsg.topic = \"escrever_receita\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 500,
+        "y": 300,
+        "wires": [
+            [
+                "98e3dc409783dad6"
+            ]
+        ]
+    },
+    {
+        "id": "98e3dc409783dad6",
+        "type": "s7 out",
+        "z": "25a6250e75cec36d",
+        "endpoint": "661280cefd5ff305",
+        "variable": "",
+        "name": "Escrever Receita no PLC",
+        "x": 830,
+        "y": 300,
+        "wires": []
+    }
+]
